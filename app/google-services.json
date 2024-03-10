@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559007200040",
+    "project_id": "restaapp-3eea0",
+    "storage_bucket": "restaapp-3eea0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559007200040:android:2a99642aa1006d4120161d",
+        "android_client_info": {
+          "package_name": "com.example.restaapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPJHtv92gVemEfcJgO-7Eu51spKWnz_X4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
