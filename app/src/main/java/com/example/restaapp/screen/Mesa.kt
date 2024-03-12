@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -108,6 +110,7 @@ fun Cuenta(mesaId: String?){
             }
     }
     if(data != null){
+        Spacer(modifier =Modifier.height(15.dp))
         DisplayCuenta(data,mesaId, cuentaTotal)
     }
 }
@@ -186,7 +189,8 @@ fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double)
                 val cantidad = value["cantidad"] as? Long ?: 0L
                 val precio = value["precio"] as? Double ?: 0.0
                 val precioUnidad = value["precio unidad"] as? Double ?: 0.0
-                Row(modifier =  Modifier.fillMaxWidth()) {
+                Row(modifier =  Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly) {
                     Text(modifier = Modifier.width(100.dp),text = "$key", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                     Text(modifier = Modifier.width(50.dp),text = "${precio}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                     Text(modifier = Modifier.width(35.dp),text = "$cantidad", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
