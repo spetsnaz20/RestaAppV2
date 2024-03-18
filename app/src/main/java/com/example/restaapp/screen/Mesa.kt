@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,13 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.restaapp.database.AddFactura
 import com.example.restaapp.database.GetRacciones
 import com.example.restaapp.database.Productos
 import com.example.restaapp.objetos.Producto
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun Mesa(mesaId: String?){
@@ -207,6 +205,8 @@ fun DisplayData(data: Map<String, Any>?,mesaId: String?) {
 
 @Composable
 fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double){
+    var context = LocalContext.current
+
     Column(modifier = Modifier
         .fillMaxWidth()
         ,horizontalAlignment = Alignment.CenterHorizontally
@@ -245,7 +245,10 @@ fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double)
                 Column {
                     Text(text = "Total: ${cuentaTotal}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(15.dp))
-                    Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
+                    Button(onClick = {
+                        val factura = AddFactura()
+                        factura.tratarCuenta(data =data,cuentaTotal,context)
+                    }, colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
                         Text(text = "Pagar", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     }
                 }
