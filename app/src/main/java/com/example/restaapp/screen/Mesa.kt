@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,7 +57,7 @@ fun Cuerpo(mesaId: String?){
     {
         Column (modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp)
+            .height(360.dp)
             .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally)
         {
@@ -71,18 +72,19 @@ fun Cuerpo(mesaId: String?){
             Button(onClick = {
                 showBebidas.value = true
                 showRacciones.value = false
-            }) {
-                Text(text = "Bebidas")
+            },colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+                Text(text = "Bebidas", fontSize = 30.sp, color = Color.Black)
             }
             Spacer(modifier = Modifier.height(20.dp))
             Button(onClick = {
                 showRacciones.value = true
                 showBebidas.value = false
-            }) {
-                Text(text = "Racciones")
+            },colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+                Text(text = "Racciones", fontSize = 30.sp, color = Color.Black)
             }
 
         }
+        Spacer(modifier =Modifier.height(10.dp))
         Column(modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
@@ -136,11 +138,11 @@ fun Cuenta(mesaId: String?){
 fun Bebidas(mesaId: String?) {
     Column(
         modifier = Modifier
-            .width(150.dp)
+            .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
         var data by remember { mutableStateOf<Map<String, Any>?>(null) }
         var bebidas = GetBebidas()
-        Text(text = "Bebidas",textAlign = TextAlign.Center, fontSize = 20.sp, modifier = Modifier.fillMaxWidth())
+        Text(text = "Bebidas",textAlign = TextAlign.Center, fontSize = 25.sp, modifier = Modifier.fillMaxWidth())
         LaunchedEffect(Unit){
             GlobalScope.launch {
                 data = bebidas.recuperarBedias()
@@ -161,7 +163,7 @@ fun Racciones(mesaId: String?) {
     ) {
         var data by remember { mutableStateOf<Map<String, Any>?>(null) }
         var racciones = GetRacciones()
-        Text(text = "Racciones",textAlign = TextAlign.Center, fontSize = 20.sp, modifier = Modifier.fillMaxWidth())
+        Text(text = "Racciones",textAlign = TextAlign.Center, fontSize = 25.sp, modifier = Modifier.fillMaxWidth())
         LaunchedEffect(Unit){
             GlobalScope.launch {
                 data = racciones.recuperarRacciones()
@@ -189,7 +191,10 @@ fun DisplayData(data: Map<String, Any>?,mesaId: String?) {
                             val producto = Producto(1, key, precioDouble)
                             val productos = Productos()
                             productos.TratarProducto(producto, mesaId.toString(), context)
-                        }, modifier = Modifier.width(140.dp).height(80.dp).padding(0.dp,0.dp,20.dp,0.dp)) {
+                        }, colors = ButtonDefaults.buttonColors(containerColor = Color.Black), modifier = Modifier
+                            .width(140.dp)
+                            .height(80.dp)
+                            .padding(0.dp, 0.dp, 20.dp, 0.dp)) {
                             Text(text = "$key", textAlign = TextAlign.Center)
                         }
                     }
@@ -218,17 +223,17 @@ fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double)
                     val precio = value["precio"] as? Double ?: 0.0
                     val precioUnidad = value["precio unidad"] as? Double ?: 0.0
                     Row(modifier =  Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically) {
-                        Text(modifier = Modifier.width(100.dp),text = "$key", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                        Text(modifier = Modifier.width(50.dp),text = "${precio}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                        Text(modifier = Modifier.width(35.dp),text = "$cantidad", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Text(modifier = Modifier.width(130.dp),text = "$key", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Text(modifier = Modifier.width(70.dp),text = "${precio}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Text(modifier = Modifier.width(55.dp),text = "$cantidad", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                         Button(onClick = {
                             val producto = Producto(1, key, precioUnidad)
                             val productos = Productos()
                             productos.BorrarProducto(producto.nombre, producto.precio,mesaId.toString())
 
-                        }) {
+                        },colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
                             Text(modifier = Modifier.width(25.dp), text = "-", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -237,7 +242,13 @@ fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double)
                 Spacer(modifier =Modifier.height(15.dp))
             }
             item {
-                Text(text = "Total: ${cuentaTotal}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                Column {
+                    Text(text = "Total: ${cuentaTotal}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(containerColor = Color.Black)) {
+                        Text(text = "Pagar", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    }
+                }
             }
         }
     }
