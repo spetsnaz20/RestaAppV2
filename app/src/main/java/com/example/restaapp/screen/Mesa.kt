@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -61,17 +62,38 @@ fun Cuerpo(mesaId: String?){
         {
             Cuenta(mesaId)
         }
+        val showBebidas = remember { mutableStateOf(false) }
+        val showRacciones = remember { mutableStateOf(false) }
         Row(modifier = Modifier
             .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-            Bebidas(mesaId)
+            Button(onClick = {
+                showBebidas.value = true
+                showRacciones.value = false
+            }) {
+                Text(text = "Bebidas")
+            }
             Spacer(modifier = Modifier.height(20.dp))
-            Racciones(mesaId)
+            Button(onClick = {
+                showRacciones.value = true
+                showBebidas.value = false
+            }) {
+                Text(text = "Racciones")
+            }
+
+        }
+        Column(modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            if(showBebidas.value){
+                Bebidas(mesaId)
+            }else if (showRacciones.value){
+                Racciones(mesaId)
+            }
         }
     }
 }
-
 @Composable
 fun Cuenta(mesaId: String?){
     var cuentaTotal by remember { mutableStateOf(0.0) }
@@ -81,11 +103,6 @@ fun Cuenta(mesaId: String?){
     var data by remember { mutableStateOf<Map<String, Any>?>(null) }
     val db = Firebase.firestore
     val docRef = db.collection("elcruce").document("Mesas").collection("Mesa${mesaId}").document("Cuenta")
-    Row{
-        Text(modifier = Modifier.width(100.dp),text = "Producto", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-        Text(modifier = Modifier.width(50.dp),text = "Precio", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-        Text(modifier = Modifier.width(55.dp),text = "Cnt", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-    }
     DisposableEffect(Unit) {
             val listenerRegistration = docRef.addSnapshotListener { snapshot, e ->
                 if (e != null) {
@@ -140,11 +157,11 @@ fun Bebidas(mesaId: String?) {
 fun Racciones(mesaId: String?) {
     Column(
         modifier = Modifier
-            .width(150.dp)
+            .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
         var data by remember { mutableStateOf<Map<String, Any>?>(null) }
         var racciones = GetRacciones()
-        Text(text = "Bebidas",textAlign = TextAlign.Center, fontSize = 20.sp, modifier = Modifier.fillMaxWidth())
+        Text(text = "Racciones",textAlign = TextAlign.Center, fontSize = 20.sp, modifier = Modifier.fillMaxWidth())
         LaunchedEffect(Unit){
             GlobalScope.launch {
                 data = racciones.recuperarRacciones()
@@ -155,25 +172,30 @@ fun Racciones(mesaId: String?) {
         }
     }
 }
-
 @Composable
 fun DisplayData(data: Map<String, Any>?,mesaId: String?) {
     var context = LocalContext.current
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(0.dp, 5.dp, 0.dp, 0.dp),horizontalAlignment = Alignment.CenterHorizontally) {
-        data?.forEach { (key, value) ->
-            if (value is Map<*, *>) {
-                    Button(onClick = {
-                        val precioDouble = value.values.first() as Double
-                        val producto = Producto(1, key, precioDouble)
-                        val productos = Productos()
-                        productos.TratarProducto(producto, mesaId.toString(), context)
-                    }, modifier = Modifier.width(100.dp)) {
-                        Text(text = "$key", textAlign = TextAlign.Center)
+    val dataList = data?.entries?.toList()?.chunked(2) ?: emptyList()
+
+    LazyColumn(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly){
+        items(dataList) { rowItems ->
+            Row(modifier = Modifier.fillMaxSize(),horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                for (entry in rowItems) {
+                    val key = entry.key
+                    val value = entry.value
+                    if (value is Map<*, *>) {
+                        Button(onClick = {
+                            val precioDouble = value.values.first() as Double
+                            val producto = Producto(1, key, precioDouble)
+                            val productos = Productos()
+                            productos.TratarProducto(producto, mesaId.toString(), context)
+                        }, modifier = Modifier.width(140.dp).height(80.dp).padding(0.dp,0.dp,20.dp,0.dp)) {
+                            Text(text = "$key", textAlign = TextAlign.Center)
+                        }
                     }
+                }
+                Spacer(modifier = Modifier.height(15.dp))
             }
-            Spacer(modifier =Modifier.height(15.dp))
         }
     }
 }
@@ -184,28 +206,39 @@ fun DisplayCuenta(data: Map<String, Any>?, mesaId: String?, cuentaTotal: Double)
         .fillMaxWidth()
         ,horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        data?.forEach { (key, value) ->
-            if (value is Map<*, *>) {
-                val cantidad = value["cantidad"] as? Long ?: 0L
-                val precio = value["precio"] as? Double ?: 0.0
-                val precioUnidad = value["precio unidad"] as? Double ?: 0.0
-                Row(modifier =  Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Text(modifier = Modifier.width(100.dp),text = "$key", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                    Text(modifier = Modifier.width(50.dp),text = "${precio}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                    Text(modifier = Modifier.width(35.dp),text = "$cantidad", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
-                    Button(onClick = {
-                        val producto = Producto(1, key, precioUnidad)
-                        val productos = Productos()
-                        productos.BorrarProducto(producto.nombre, producto.precio,mesaId.toString())
+        LazyColumn(modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            items(data?.entries?.toList() ?: emptyList()) {entry ->
+                val key = entry.key
+                val value = entry.value
+                if (value is Map<*,*>){
+                    val cantidad = value["cantidad"] as? Long ?: 0L
+                    val precio = value["precio"] as? Double ?: 0.0
+                    val precioUnidad = value["precio unidad"] as? Double ?: 0.0
+                    Row(modifier =  Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text(modifier = Modifier.width(100.dp),text = "$key", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Text(modifier = Modifier.width(50.dp),text = "${precio}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Text(modifier = Modifier.width(35.dp),text = "$cantidad", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        Button(onClick = {
+                            val producto = Producto(1, key, precioUnidad)
+                            val productos = Productos()
+                            productos.BorrarProducto(producto.nombre, producto.precio,mesaId.toString())
 
-                    }) {
-                        Text(modifier = Modifier.width(25.dp), text = "-", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        }) {
+                            Text(modifier = Modifier.width(25.dp), text = "-", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+                        }
                     }
+
                 }
+                Spacer(modifier =Modifier.height(15.dp))
             }
-            Spacer(modifier =Modifier.height(15.dp))
+            item {
+                Text(text = "Total: ${cuentaTotal}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+            }
         }
-        Text(text = "Total: ${cuentaTotal}€", textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
     }
 }
